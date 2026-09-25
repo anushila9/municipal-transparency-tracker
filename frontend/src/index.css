@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  /* Nepal flag blue as the primary civic colour. */
+  --color-brand-50: #eef3fc;
+  --color-brand-100: #d9e4f7;
+  --color-brand-600: #1d4fb8;
+  --color-brand-700: #003893;
+  --color-brand-800: #002c75;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 antialiased;
+}

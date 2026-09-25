@@ -1,0 +1,13 @@
+# Secrets and local configuration: never commit. Copy backend/.env.example to backend/.env instead.
+.env
+.env.*
+!.env.example
+backend/config/application-local.properties
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Temporary screenshots from browser testing
+.tmp-shots/
