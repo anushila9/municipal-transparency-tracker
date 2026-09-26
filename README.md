@@ -49,9 +49,18 @@ To reset the seed data: `psql postgres -c "DROP DATABASE egov_tracker;" -c "CREA
 | GET | `/api/projects/{id}` | public | Project detail and status history |
 | GET | `/api/meta` | public | Filter options and labels |
 | POST | `/api/auth/login` | public | `{email, password}` → JWT |
+| GET | `/api/stats?fiscalYear=` | public | Dashboard totals, status and sector breakdown |
 | GET | `/api/admin/me` | admin JWT | Current admin profile |
+| POST | `/api/admin/projects` | admin JWT | Create a project (writes the first StatusHistory entry) |
+| PUT | `/api/admin/projects/{id}` | admin JWT | Update a project; each changed field goes to AuditLog, a changed status goes to StatusHistory |
+| POST | `/api/admin/projects/{id}/status` | admin JWT | `{status, note}` → records a status change |
+| DELETE | `/api/admin/projects/{id}` | admin JWT | Delete a project (the deletion is kept in AuditLog) |
+| GET | `/api/admin/reports?state=ALL\|OPEN\|RESPONDED&projectId=&page=&size=` | admin JWT | Citizen reports inbox |
+| GET | `/api/admin/reports/counts` | admin JWT | Open / responded totals |
+| PUT | `/api/admin/reports/{id}/response` | admin JWT | `{response}` → add or edit the official response |
+| GET | `/api/admin/audit?entityType=&entityId=&page=&size=` | admin JWT | Read-only audit trail, newest first |
 
-`sort` accepts `RECENT` (default), `BUDGET_DESC`, `BUDGET_ASC` or `TITLE`. Errors are returned as RFC 9457 `application/problem+json`.
+`sort` accepts `RECENT` (default), `BUDGET_DESC`, `BUDGET_ASC` or `TITLE`. Errors are returned as RFC 9457 `application/problem+json`; validation failures add an `errors` map of field → message.
 
 ## Environment variables (backend)
 

@@ -19,3 +19,13 @@ export const STATUS_STYLES = {
   STALLED: 'bg-amber-50 text-amber-900 ring-amber-300',
   COMPLETED: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
 }
+
+/** Solid status colours for bars and dots (always shown next to a text label). */
+export const STATUS_FILL = {
+  NOT_STARTED: 'bg-slate-400',
+  IN_PROGRESS: 'bg-blue-600',
+  STALLED: 'bg-amber-500',
+  COMPLETED: 'bg-emerald-600',
+}
+
+export const toOptions = (labels) => Object.entries(labels).map(([value, label]) => ({ value, label }))
