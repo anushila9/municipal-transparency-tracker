@@ -16,3 +16,8 @@ export function fetchProject(id, signal) {
 export function fetchStats(fiscalYear, signal) {
   return api(`/api/stats${query({ fiscalYear })}`, { signal })
 }
+
+/** Public citizen report. `form` is FormData with comment, optional reporterName / photo, and the website honeypot. */
+export function submitReport(projectId, form) {
+  return api(`/api/projects/${encodeURIComponent(projectId)}/reports`, { method: 'POST', body: form })
+}

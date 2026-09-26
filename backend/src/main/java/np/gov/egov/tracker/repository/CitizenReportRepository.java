@@ -6,13 +6,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
 
 public interface CitizenReportRepository extends JpaRepository<CitizenReport, Long>, JpaSpecificationExecutor<CitizenReport> {
 
     @Override
     @EntityGraph(attributePaths = {"project", "respondedBy"})
     Page<CitizenReport> findAll(Specification<CitizenReport> spec, Pageable pageable);
+
+    @Query("select r.photoUrl from CitizenReport r where r.project.id = :projectId and r.photoUrl is not null")
+    List<String> findPhotoKeysByProjectId(Long projectId);
 
     long countByAdminResponseIsNull();
 

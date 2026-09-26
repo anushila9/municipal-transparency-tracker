@@ -55,6 +55,13 @@ public class ReportAdminService {
         return new ReportCounts(reports.countByAdminResponseIsNull(), reports.countByAdminResponseIsNotNull());
     }
 
+    @Transactional(readOnly = true)
+    public String photoKey(Long id) {
+        return reports.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Report " + id + " not found"))
+                .getPhotoUrl();
+    }
+
     public ReportView respond(Long id, String response, AdminUser admin) {
         CitizenReport r = reports.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Report " + id + " not found"));

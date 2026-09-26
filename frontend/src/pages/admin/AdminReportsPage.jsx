@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useOutletContext } from 'react-router'
 import { CheckCircle2, Clock, ImageIcon, MessageSquareReply, Pencil, User, X } from 'lucide-react'
-import { fetchReports, respondToReport } from '../../api/admin.js'
+import { fetchReportPhoto, fetchReports, respondToReport } from '../../api/admin.js'
 import { useRequest } from '../../api/useRequest.js'
 import { useUrlParams } from '../../components/admin/useUrlParams.js'
 import StatusBadge from '../../components/StatusBadge.jsx'
@@ -145,11 +145,7 @@ function ReportCard({ report: r, onResponded }) {
           <span>· {formatDate(r.submittedAt)}</span>
         </p>
         <blockquote className="mt-2 border-l-4 border-slate-200 pl-3 whitespace-pre-line text-slate-800">{r.comment}</blockquote>
-        {r.photoUrl && (
-          <a href={r.photoUrl} target="_blank" rel="noreferrer noopener" className="mt-3 inline-flex min-h-9 items-center gap-1.5 text-sm font-medium text-brand-700 hover:underline">
-            <ImageIcon aria-hidden="true" className="h-4 w-4" /> View attached photo
-          </a>
-        )}
+        {r.hasPhoto && <ReportPhoto reportId={r.id} />}
       </div>
 
       <div className="border-t border-line bg-slate-50/60 px-4 py-4 sm:px-5">
@@ -224,5 +220,42 @@ function ResponseForm({ report, onCancel, onSaved }) {
         </Button>
       </div>
     </form>
+  )
+}
+
+/** Photos are admin-only, so they're fetched with the session token and shown from a local object URL. */
+function ReportPhoto({ reportId }) {
+  const [state, setState] = useState({ id: null, url: null, failed: false })
+
+  useEffect(() => {
+    const ctrl = new AbortController()
+    let url = null
+    fetchReportPhoto(reportId, ctrl.signal).then(
+      (blob) => {
+        url = URL.createObjectURL(blob)
+        setState({ id: reportId, url, failed: false })
+      },
+      (err) => err.name !== 'AbortError' && setState({ id: reportId, url: null, failed: true }),
+    )
+    return () => {
+      ctrl.abort()
+      if (url) URL.revokeObjectURL(url)
+    }
+  }, [reportId])
+
+  if (state.id !== reportId) {
+    return <div className="mt-3 h-24 w-32 animate-pulse rounded-lg bg-slate-100" aria-label="Loading photo" />
+  }
+  if (state.failed) {
+    return (
+      <p className="mt-3 flex items-center gap-1.5 text-sm text-slate-500">
+        <ImageIcon aria-hidden="true" className="h-4 w-4" /> Photo could not be loaded.
+      </p>
+    )
+  }
+  return (
+    <a href={state.url} target="_blank" rel="noreferrer" className="mt-3 inline-block" title="Open full size">
+      <img src={state.url} alt="Photo attached by the citizen" className="h-24 max-w-48 rounded-lg border border-line object-cover hover:opacity-90" />
+    </a>
   )
 }

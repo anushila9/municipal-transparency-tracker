@@ -2,6 +2,7 @@ package np.gov.egov.tracker.service;
 
 import np.gov.egov.tracker.domain.*;
 import np.gov.egov.tracker.repository.AuditLogRepository;
+import np.gov.egov.tracker.repository.CitizenReportRepository;
 import np.gov.egov.tracker.repository.ProjectRepository;
 import np.gov.egov.tracker.repository.StatusHistoryRepository;
 import np.gov.egov.tracker.web.dto.ProjectDetail;
@@ -9,10 +10,13 @@ import np.gov.egov.tracker.web.dto.ProjectForm;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -30,13 +34,17 @@ public class ProjectAdminService {
     private final StatusHistoryRepository history;
     private final AuditLogRepository audit;
     private final ProjectQueryService query;
+    private final CitizenReportRepository reports;
+    private final ReportPhotoStorage photos;
 
     public ProjectAdminService(ProjectRepository projects, StatusHistoryRepository history, AuditLogRepository audit,
-                               ProjectQueryService query) {
+                               ProjectQueryService query, CitizenReportRepository reports, ReportPhotoStorage photos) {
         this.projects = projects;
         this.history = history;
         this.audit = audit;
         this.query = query;
+        this.reports = reports;
+        this.photos = photos;
     }
 
     public ProjectDetail create(ProjectForm form, AdminUser admin) {
@@ -93,7 +101,15 @@ public class ProjectAdminService {
         Project p = find(id);
         // Status history and citizen reports are removed by ON DELETE CASCADE; the audit trail is kept.
         audit.save(new AuditLog(ENTITY, p.getId(), "deleted", p.getTitle(), null, admin, Instant.now()));
+        List<String> photoKeys = reports.findPhotoKeysByProjectId(id);
         projects.delete(p);
+        // Report photos live on disk, outside the cascade; remove them only once the delete has committed.
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                photoKeys.forEach(photos::delete);
+            }
+        });
     }
 
     private void recordStatusChange(Project p, ProjectStatus status, String note, AdminUser admin, Instant at) {
@@ -154,10 +170,8 @@ public class ProjectAdminService {
         return d == null ? null : d.stripTrailingZeros().toPlainString();
     }
 
-    /** Trims, strips control characters (keeping newlines and tabs), and turns blank input into null. */
+    /** See {@link TextSanitizer#multiLine}: strips control/invisible characters and turns blank input into null. */
     static String clean(String s) {
-        if (s == null) return null;
-        String cleaned = s.replaceAll("[\\p{Cntrl}&&[^\\n\\t]]", "").trim();
-        return cleaned.isEmpty() ? null : cleaned;
+        return TextSanitizer.multiLine(s);
     }
 }
