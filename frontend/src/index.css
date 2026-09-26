@@ -1,14 +1,77 @@
 @import "tailwindcss";
 
+/*
+ * Pariyojana Tracker design tokens. Defined once here and used everywhere through Tailwind utilities
+ * (bg-brand-700, text-accent-700, bg-paper, font-sans, ...). Components live in src/components/ui.
+ *
+ * Palette: Nepal flag blue (brand) for structure and primary actions, flag crimson (accent) used
+ * sparingly for identity (header rule, active nav), warm "paper" neutrals instead of SaaS white.
+ * Status colours (slate / blue / amber / emerald) are reserved for project status and never reused.
+ */
 @theme {
-  /* Nepal flag blue as the primary civic colour. */
+  --font-sans: "Noto Sans Variable", "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+
   --color-brand-50: #eef3fc;
   --color-brand-100: #d9e4f7;
+  --color-brand-200: #b5c9ee;
+  --color-brand-500: #3a67c9;
   --color-brand-600: #1d4fb8;
   --color-brand-700: #003893;
   --color-brand-800: #002c75;
+  --color-brand-900: #001d4f;
+  --color-brand-950: #00122f;
+
+  --color-accent-50: #fdf0f2;
+  --color-accent-100: #fadbe0;
+  --color-accent-600: #dc143c;
+  --color-accent-700: #b01030;
+
+  /* Page background: a warm off-white so cards (white) lift off it without heavy shadows. */
+  --color-paper: #f6f5f1;
+  --color-line: #e3e1da;
+
+  /* Chart series: two steps of the brand hue (validated for contrast and CVD separation). */
+  --color-chart-allocated: #5b8bd6;
+  --color-chart-spent: #0b2f6e;
 }
 
-body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+@layer base {
+  body {
+    @apply bg-paper font-sans text-slate-900 antialiased;
+  }
+
+  /* Visible keyboard focus everywhere, in the brand colour. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+  }
+
+  /* Amounts and dates line up in tables. */
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-toast-in {
+  animation: toast-in 160ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
