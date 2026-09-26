@@ -50,6 +50,7 @@ To reset the seed data: `psql postgres -c "DROP DATABASE egov_tracker;" -c "CREA
 | GET | `/api/meta` | public | Filter options and labels |
 | POST | `/api/auth/login` | public | `{email, password}` → JWT |
 | GET | `/api/stats?fiscalYear=` | public | Dashboard totals, status and sector breakdown |
+| POST | `/api/projects/{id}/reports` | public, rate limited | Citizen report: multipart `comment`, optional `reporterName` and `photo` (see below) |
 | GET | `/api/admin/me` | admin JWT | Current admin profile |
 | POST | `/api/admin/projects` | admin JWT | Create a project (writes the first StatusHistory entry) |
 | PUT | `/api/admin/projects/{id}` | admin JWT | Update a project; each changed field goes to AuditLog, a changed status goes to StatusHistory |
@@ -57,14 +58,26 @@ To reset the seed data: `psql postgres -c "DROP DATABASE egov_tracker;" -c "CREA
 | DELETE | `/api/admin/projects/{id}` | admin JWT | Delete a project (the deletion is kept in AuditLog) |
 | GET | `/api/admin/reports?state=ALL\|OPEN\|RESPONDED&projectId=&page=&size=` | admin JWT | Citizen reports inbox |
 | GET | `/api/admin/reports/counts` | admin JWT | Open / responded totals |
+| GET | `/api/admin/reports/{id}/photo` | admin JWT | The report's photo (JPEG) |
 | PUT | `/api/admin/reports/{id}/response` | admin JWT | `{response}` → add or edit the official response |
 | GET | `/api/admin/audit?entityType=&entityId=&page=&size=` | admin JWT | Read-only audit trail, newest first |
 
 `sort` accepts `RECENT` (default), `BUDGET_DESC`, `BUDGET_ASC` or `TITLE`. Errors are returned as RFC 9457 `application/problem+json`; validation failures add an `errors` map of field → message.
+
+### Citizen report submissions
+
+The report endpoint is public and unauthenticated, so the server validates everything itself, whatever the frontend checked:
+
+- **Text** is normalised (Unicode NFC, control and invisible characters removed, whitespace tidied) *before* length checks, so padding can't slip past limits. Comment: 10–2,000 characters with at least one letter or digit. Name: optional, at most 120 characters, must contain a letter.
+- **Form shape:** only `comment`, `reporterName`, `photo` and the `website` honeypot are accepted, each at most once. Anything else is a 400.
+- **Photos** are identified by their bytes (not the claimed type or filename), JPEG/PNG only, at most 5 MB and 8000×8000 px (checked before decoding). They are then re-encoded as a downscaled JPEG, which strips all metadata, including GPS location. Stored under random names in `UPLOADS_DIR` and served only to admins.
+- **Size caps** are enforced while the request is parsed: 5 MB per file, 6 MB per request, 10 parts.
+- **Rate limit:** 5 submissions per client address per 15 minutes (`429` with `Retry-After`). Behind a reverse proxy, set `server.forward-headers-strategy=native` so the real client address is used.
+- **Honeypot:** a hidden `website` field. If it's filled in, the server responds as if the report was saved but stores nothing.
 
 ## Environment variables (backend)
 
 Set these as real environment variables, or in `backend/.env` (see `backend/.env.example`).
 
 - **Required:** `DB_PASSWORD`, `JWT_SECRET` (at least 32 bytes)
-- **Optional:** `SEED_ADMIN_PASSWORD`, `DB_URL`, `DB_USER`, `CORS_ORIGINS`, `SEED_ENABLED`
+- **Optional:** `SEED_ADMIN_PASSWORD`, `DB_URL`, `DB_USER`, `CORS_ORIGINS`, `SEED_ENABLED`, `UPLOADS_DIR` (default `backend/uploads`), `REPORT_RATE_LIMIT_MAX` (default 5)

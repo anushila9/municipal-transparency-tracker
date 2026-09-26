@@ -1,4 +1,4 @@
-import { api, query } from './client.js'
+import { api, apiBlob, query } from './client.js'
 
 export function login(email, password) {
   return api('/api/auth/login', { method: 'POST', body: { email, password } })
@@ -40,4 +40,8 @@ export function respondToReport(id, response) {
 /** params: { entityType, entityId, page, size } */
 export function fetchAudit(params, signal) {
   return api(`/api/admin/audit${query(params)}`, { signal })
+}
+
+export function fetchReportPhoto(id, signal) {
+  return apiBlob(`/api/admin/reports/${id}/photo`, { signal })
 }

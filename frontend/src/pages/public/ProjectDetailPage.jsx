@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import { fetchProject } from '../../api/projects.js'
 import BudgetBar from '../../components/BudgetBar.jsx'
+import ReportForm from '../../components/ReportForm.jsx'
 import StatusBadge from '../../components/StatusBadge.jsx'
 import { EmptyState, ErrorState } from '../../components/States.jsx'
 import { daysBetween, parseLocalDate, today } from '../../lib/dates.js'
@@ -78,6 +79,16 @@ function ProjectDetail({ project: p }) {
       </div>
 
       <StatusHistory history={p.statusHistory} />
+
+      <section id="report" className="rounded-xl border border-line bg-white p-4 shadow-sm sm:p-6">
+        <h2 className="text-base font-semibold text-slate-900">Report on this project</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Seen something that doesn't match what's shown here? Tell the ward office. No account needed.
+        </p>
+        <div className="mt-4">
+          <ReportForm projectId={p.id} />
+        </div>
+      </section>
 
       <p className="px-1 text-xs text-slate-500">Record last updated {formatDate(p.updatedAt)}.</p>
     </article>

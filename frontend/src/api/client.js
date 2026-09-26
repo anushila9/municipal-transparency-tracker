@@ -57,14 +57,16 @@ export function expireSession() {
  */
 export async function api(path, { method = 'GET', body, signal } = {}) {
   const headers = { Accept: 'application/json' }
-  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  // FormData (file uploads) sets its own multipart Content-Type with the boundary.
+  const isForm = body instanceof FormData
+  if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json'
   const isAdmin = path.startsWith('/api/admin')
   const token = getToken()
   if (token && isAdmin) headers.Authorization = `Bearer ${token}`
 
   let res
   try {
-    res = await fetch(path, { method, headers, signal, body: body === undefined ? undefined : JSON.stringify(body) })
+    res = await fetch(path, { method, headers, signal, body: body === undefined || isForm ? body : JSON.stringify(body) })
   } catch (err) {
     if (err.name === 'AbortError') throw err
     throw new ApiError('Could not reach the server. Check your connection and try again.', 0)
@@ -91,9 +93,28 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
       // Non-JSON error body; keep the generic message.
     }
     if (res.status === 403) message = 'You do not have permission to do that.'
+    if (res.status === 413 && !fieldErrors) message = 'The upload is too large. Photos must be 5 MB or smaller.'
     throw new ApiError(message, res.status, fieldErrors)
   }
   return res.status === 204 ? null : res.json()
+}
+
+/** Fetches an admin-only file (e.g. a report photo) with the session token and returns it as a Blob. */
+export async function apiBlob(path, { signal } = {}) {
+  const token = getToken()
+  let res
+  try {
+    res = await fetch(path, { signal, headers: token ? { Authorization: `Bearer ${token}` } : {} })
+  } catch (err) {
+    if (err.name === 'AbortError') throw err
+    throw new ApiError('Could not reach the server.', 0)
+  }
+  if (res.status === 401 && path.startsWith('/api/admin')) {
+    expireSession()
+    throw new ApiError('Your session has expired. Please sign in again.', 401)
+  }
+  if (!res.ok) throw new ApiError(`Request failed (${res.status})`, res.status)
+  return res.blob()
 }
 
 /** Builds a query string, dropping empty values. */

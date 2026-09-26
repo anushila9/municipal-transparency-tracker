@@ -44,6 +44,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/projects/**", "/api/meta", "/api/stats").permitAll()
+                        // Citizen reports: public by design, validated and rate limited in PublicReportController.
+                        .requestMatchers(HttpMethod.POST, "/api/projects/*/reports").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/error").permitAll()
                         .anyRequest().denyAll())
