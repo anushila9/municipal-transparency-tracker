@@ -4,7 +4,9 @@ public enum Sector {
     ROADS("Roads & Transport"),
     DRINKING_WATER("Drinking Water"),
     EDUCATION("Education"),
-    DRAINAGE("Drainage & Sanitation");
+    DRAINAGE("Drainage & Sanitation"),
+    CONSTRUCTION("Construction"),
+    RECREATION("Recreation");
 
     private final String label;
 

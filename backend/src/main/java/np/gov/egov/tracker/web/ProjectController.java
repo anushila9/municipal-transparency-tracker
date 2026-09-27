@@ -11,6 +11,7 @@ import np.gov.egov.tracker.service.ProjectQueryService.SortOption;
 import np.gov.egov.tracker.web.dto.PageResponse;
 import np.gov.egov.tracker.web.dto.ProjectDetail;
 import np.gov.egov.tracker.web.dto.ProjectSummary;
+import np.gov.egov.tracker.web.dto.PublicReport;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,5 +43,13 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ProjectDetail get(@PathVariable Long id) {
         return service.get(id);
+    }
+
+    @GetMapping("/{id}/reports")
+    public PageResponse<PublicReport> reports(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size) {
+        return service.reports(id, page, size);
     }
 }

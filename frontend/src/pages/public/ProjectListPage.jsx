@@ -124,7 +124,7 @@ function Filters({ meta, searchParams, onChange, onClear, hasFilters }) {
 
       <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-5">
         <Select label="Sector" value={searchParams.get('sector')} onChange={(v) => onChange('sector', v)} options={sectors} allLabel="All sectors" />
-        <Select label="Status" value={searchParams.get('status')} onChange={(v) => onChange('status', v)} options={statuses} allLabel="All statuses" />
+        <Select label="Status" value={searchParams.get('status')} onChange={(v) => onChange('status', v)} options={statuses} allLabel="All status" />
         <Select
           label="Fiscal year"
           value={searchParams.get('fiscalYear')}

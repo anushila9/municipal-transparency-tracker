@@ -206,7 +206,7 @@ function ResponseForm({ report, onCancel, onSaved }) {
 
   return (
     <form onSubmit={submit} noValidate>
-      <Field label={report.adminResponse ? 'Edit response' : 'Your response'} error={error} hint={`${text.length}/2000 · Be specific: what was found, what happens next, and when.`}>
+      <Field label={report.adminResponse ? 'Edit response' : 'Your response'} error={error} hint={`${text.length}/2000 · Shown publicly on the project page. Be specific: what was found, what happens next, and when.`}>
         {(p) => <Textarea {...p} rows={3} maxLength={2000} value={text} onChange={(e) => { setText(e.target.value); if (error) setError(null) }} invalid={Boolean(error)} />}
       </Field>
       <div className="mt-3 flex flex-wrap justify-end gap-2">

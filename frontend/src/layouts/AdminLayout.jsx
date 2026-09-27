@@ -71,7 +71,7 @@ export default function AdminLayout() {
     <div className="flex h-full flex-col bg-brand-900 text-white">
       <div className="border-t-4 border-accent-600 px-4 py-4">
         <Link to="/admin" className="block">
-          <Brand subtitle="Municipal staff panel" />
+          <Brand subtitle="Municipal Admin panel" />
         </Link>
       </div>
       <nav className="flex-1 space-y-1 px-3 py-2" aria-label="Admin">
@@ -127,7 +127,7 @@ export default function AdminLayout() {
       {/* Mobile / tablet top bar and drawer */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-t-4 border-accent-600 bg-brand-900 px-3 py-2 text-white lg:hidden">
         <Link to="/admin" className="min-w-0">
-          <Brand subtitle="Municipal staff panel" />
+          <Brand subtitle="Municipal Admin panel" />
         </Link>
         <button
           onClick={() => setMenuOpen(true)}

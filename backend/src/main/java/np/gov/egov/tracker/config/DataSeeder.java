@@ -188,7 +188,7 @@ public class DataSeeder implements ApplicationRunner {
             // Printed once, only when the account is first created; set SEED_ADMIN_PASSWORD to choose your own.
             log.warn("Generated admin password for {}: {}", adminEmail, password);
         }
-        return admins.save(new AdminUser("Ward 5 Office (Ward Secretary)", adminEmail, passwordEncoder.encode(password), AdminRole.ADMIN));
+        return admins.save(new AdminUser("Municipal Admin", adminEmail, passwordEncoder.encode(password), AdminRole.ADMIN));
     }
 
     private Project seed(Seed s, AdminUser admin) {

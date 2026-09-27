@@ -21,3 +21,8 @@ export function fetchStats(fiscalYear, signal) {
 export function submitReport(projectId, form) {
   return api(`/api/projects/${encodeURIComponent(projectId)}/reports`, { method: 'POST', body: form })
 }
+
+/** Citizen reports on a project with the municipality's replies, newest first. Names and photos are never included. */
+export function fetchProjectReports(projectId, page, signal) {
+  return api(`/api/projects/${encodeURIComponent(projectId)}/reports${query({ page, size: 10 })}`, { signal })
+}

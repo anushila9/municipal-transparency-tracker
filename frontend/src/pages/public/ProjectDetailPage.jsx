@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import { fetchProject } from '../../api/projects.js'
 import BudgetBar from '../../components/BudgetBar.jsx'
+import ProjectReports from '../../components/ProjectReports.jsx'
 import ReportForm from '../../components/ReportForm.jsx'
 import StatusBadge from '../../components/StatusBadge.jsx'
 import { EmptyState, ErrorState } from '../../components/States.jsx'
@@ -56,6 +57,7 @@ export default function ProjectDetailPage() {
 }
 
 function ProjectDetail({ project: p }) {
+  const [reportsVersion, setReportsVersion] = useState(0)
   return (
     <article className="space-y-4">
       <header className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
@@ -80,13 +82,16 @@ function ProjectDetail({ project: p }) {
 
       <StatusHistory history={p.statusHistory} />
 
+      <ProjectReports projectId={p.id} refreshKey={reportsVersion} />
+
       <section id="report" className="rounded-xl border border-line bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-base font-semibold text-slate-900">Report on this project</h2>
         <p className="mt-1 text-sm text-slate-600">
-          Seen something that doesn't match what's shown here? Tell the ward office. No account needed.
+          Seen something that doesn't match what's shown here? Tell the municipality. No account needed. Your report and the
+          municipal reply will appear above for everyone to see.
         </p>
         <div className="mt-4">
-          <ReportForm projectId={p.id} />
+          <ReportForm projectId={p.id} onSent={() => setReportsVersion((n) => n + 1)} />
         </div>
       </section>
 
