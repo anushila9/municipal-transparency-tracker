@@ -20,6 +20,8 @@ public interface CitizenReportRepository extends JpaRepository<CitizenReport, Lo
     @Query("select r.photoUrl from CitizenReport r where r.project.id = :projectId and r.photoUrl is not null")
     List<String> findPhotoKeysByProjectId(Long projectId);
 
+    Page<CitizenReport> findByProjectId(Long projectId, Pageable pageable);
+
     long countByAdminResponseIsNull();
 
     long countByAdminResponseIsNotNull();

@@ -24,7 +24,7 @@ function validate({ comment, name, photo }) {
 }
 
 /** Citizen report on a project. No login; the name is optional so people can report anonymously. */
-export default function ReportForm({ projectId }) {
+export default function ReportForm({ projectId, onSent }) {
   const [comment, setComment] = useState('')
   const [name, setName] = useState('')
   const [photo, setPhoto] = useState(null)
@@ -81,6 +81,7 @@ export default function ReportForm({ projectId }) {
     try {
       await submitReport(projectId, form)
       setSent(true)
+      onSent?.()
       setComment('')
       setName('')
       removePhoto()
@@ -104,9 +105,9 @@ export default function ReportForm({ projectId }) {
     return (
       <div role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
         <p className="flex items-center gap-2 font-semibold">
-          <CircleCheck aria-hidden="true" className="h-4 w-4" /> Thank you. Your report was sent to the ward office.
+          <CircleCheck aria-hidden="true" className="h-4 w-4" /> Thank you. Your report was sent to the municipality.
         </p>
-        <p className="mt-1 text-emerald-800">Staff review every report. What you described helps keep this project accountable.</p>
+        <p className="mt-1 text-emerald-800">Staff review every report. It now appears under “Citizen reports and replies”, and the municipal reply will show there too.</p>
         <button onClick={() => setSent(false)} className="mt-3 inline-flex min-h-11 items-center font-medium text-brand-700 hover:underline">
           Send another report
         </button>
@@ -138,7 +139,7 @@ export default function ReportForm({ projectId }) {
         )}
       </Field>
 
-      <Field label="Your name" name="reporterName" error={errors.reporterName} hint="Optional. Leave blank to report anonymously.">
+      <Field label="Your name" name="reporterName" error={errors.reporterName} hint="Optional. Only the Municipal Admin sees it; it is never shown publicly.">
         {(p) => (
           <Input
             {...p}
@@ -192,7 +193,7 @@ export default function ReportForm({ projectId }) {
           <p className="mt-1 text-xs font-medium text-accent-700">{errors.photo}</p>
         ) : (
           <p id="photo-hint" className="mt-1 text-xs text-slate-500">
-            JPEG or PNG, up to 5 MB. Location data inside the photo is removed.
+            JPEG or PNG, up to 5 MB. Only the Municipal Admin sees it. Location data inside the photo is removed.
           </p>
         )}
       </div>

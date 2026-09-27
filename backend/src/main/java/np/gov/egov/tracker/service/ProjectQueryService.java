@@ -4,11 +4,13 @@ import jakarta.persistence.criteria.Predicate;
 import np.gov.egov.tracker.domain.Project;
 import np.gov.egov.tracker.domain.ProjectStatus;
 import np.gov.egov.tracker.domain.Sector;
+import np.gov.egov.tracker.repository.CitizenReportRepository;
 import np.gov.egov.tracker.repository.ProjectRepository;
 import np.gov.egov.tracker.repository.StatusHistoryRepository;
 import np.gov.egov.tracker.web.dto.PageResponse;
 import np.gov.egov.tracker.web.dto.ProjectDetail;
 import np.gov.egov.tracker.web.dto.ProjectSummary;
+import np.gov.egov.tracker.web.dto.PublicReport;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -42,10 +44,12 @@ public class ProjectQueryService {
 
     private final ProjectRepository projects;
     private final StatusHistoryRepository history;
+    private final CitizenReportRepository reports;
 
-    public ProjectQueryService(ProjectRepository projects, StatusHistoryRepository history) {
+    public ProjectQueryService(ProjectRepository projects, StatusHistoryRepository history, CitizenReportRepository reports) {
         this.projects = projects;
         this.history = history;
+        this.reports = reports;
     }
 
     public PageResponse<ProjectSummary> search(Filter filter, SortOption sort, int page, int size) {
@@ -57,6 +61,15 @@ public class ProjectQueryService {
         Project p = projects.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project " + id + " not found"));
         return ProjectDetail.from(p, history.findByProjectIdOrderByChangedAtAsc(id));
+    }
+
+    /** Citizen reports on a project with the municipality's replies, newest first. */
+    public PageResponse<PublicReport> reports(Long projectId, int page, int size) {
+        if (!projects.existsById(projectId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Project " + projectId + " not found");
+        }
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "submittedAt", "id"));
+        return PageResponse.of(reports.findByProjectId(projectId, pageable), PublicReport::from);
     }
 
     private static Specification<Project> toSpec(Filter f) {

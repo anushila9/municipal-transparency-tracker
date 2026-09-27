@@ -11,3 +11,7 @@ backend/config/application-local.properties
 
 # Temporary screenshots from browser testing
 .tmp-shots/
+
+# Report documents (kept locally, not in the repo)
+*.docx
+*.pdf

@@ -11,6 +11,8 @@ export const SECTOR_LABELS = {
   DRINKING_WATER: 'Drinking Water',
   EDUCATION: 'Education',
   DRAINAGE: 'Drainage & Sanitation',
+  CONSTRUCTION: 'Construction',
+  RECREATION: 'Recreation',
 }
 
 export const STATUS_STYLES = {
